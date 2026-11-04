@@ -1,0 +1,7 @@
+node_modules/
+.next/
+*.tsbuildinfo
+next-env.d.ts
+# o banco do quiz é estado de execução, não código
+data/
+.DS_Store

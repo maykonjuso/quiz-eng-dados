@@ -1,0 +1,1364 @@
+/*
+ * Tema do deck. Decisão deliberada: CLARO por padrão.
+ * Projetor em sala com luz come o preto; dark theme bonito no monitor vira
+ * sopa cinza na parede. O bloco de terminal é a única área escura — e isso
+ * ajuda: "escuro = é aqui que se digita".
+ */
+:root {
+  --tinta: #0b0b0c;
+  --tinta-2: #4b5563;
+  --papel: #fafaf9;
+  --papel-2: #f1f0ee;
+  --borda: #d9d7d2;
+  --acento: #1d4ed8;
+  --ok: #15803d;
+  --erro: #b91c1c;
+  --atencao: #a16207;
+  --term-fundo: #16161a;
+  --term-tinta: #e8e8ea;
+  /*
+   * Cores derivadas. Nenhum componente escreve cor fixa (#eff4ff, #fff…): ele
+   * usa estes tokens, que o tema escuro redefine. Era a cor fixa que deixava
+   * texto escuro sobre fundo escuro quando a pessoa trocava de tema.
+   */
+  --acento-suave: #e8efff;
+  --ok-suave: #e9f7ee;
+  --erro-suave: #fdecec;
+  --atencao-suave: #fdf4e3;
+  --sobre-acento: #ffffff;     /* texto em cima de fundo var(--acento) */
+  --sobre-ok: #ffffff;
+  --tinta-hover: #2a2a30;      /* fundo do botão escuro ao passar o mouse */
+  --sombra: 0 8px 24px rgba(0, 0, 0, 0.12);
+  /*
+   * Escala de espaçamento: tudo é múltiplo de 8.
+   * Uma escala fechada é o que faz telas diferentes parecerem o mesmo produto:
+   * sem ela cada caixa recebe um número inventado na hora (12, 13, 22, 26) e o
+   * olho percebe desalinho mesmo sem saber dizer onde.
+   */
+  --e05: 8px;   /* nome antigo do meio-passo; hoje também 8 */
+  --e1: 8px;
+  --e2: 16px;
+  --e3: 24px;
+  --e4: 32px;
+  --e5: 40px;
+  --e6: 48px;
+  --e8: 64px;
+
+  /* raios na mesma lógica: 8, 16, 24 */
+  --r-p: 8px;
+  --r: 8px;
+  --r-m: 16px;
+  --r-g: 24px;
+  /* alturas de controle: tudo o que é clicável tem uma destas */
+  --h-p: 32px;   /* chip, botão da barra */
+  --h: 40px;     /* botão e campo de texto */
+  --h-g: 48px;   /* botão principal */
+  /* margem da cena: a mesma em toda cena do mesmo tamanho de tela */
+  --margem-y: 32px;
+  --margem-x: 48px;
+  --respiro: 24px;   /* espaço entre os blocos de uma cena */
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+  /* só fontes que existem na máquina: nada é baixado (a rede é local, sem internet) */
+  --mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, Consolas, "DejaVu Sans Mono", monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", sans-serif;
+}
+
+/*
+ * Tema escuro do slide.
+ *
+ * Não é o padrão de propósito: no projetor, sala com luz acesa come o preto e
+ * o resultado na parede é pior que o do tema claro. No notebook de cada pessoa
+ * a escolha é dela, e o sistema dela dá o primeiro palpite.
+ */
+:root[data-tema="escuro"] {
+  --tinta: #ecedf0;
+  --tinta-2: #a1a7b3;
+  --papel: #121317;
+  --papel-2: #1b1d23;
+  --borda: #2f333c;
+  --acento: #7cb0ff;
+  --ok: #5bd48a;
+  --erro: #ff8080;
+  --atencao: #f5c451;
+  --term-fundo: #07080a;
+  --term-tinta: #ecedf0;
+  --acento-suave: #1a2540;
+  --ok-suave: #13291d;
+  --erro-suave: #331a1c;
+  --atencao-suave: #2e2614;
+  --sobre-acento: #0d1117;
+  --sobre-ok: #0d1117;
+  --tinta-hover: #d4d6dc;
+  --sombra: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+:root[data-tema="escuro"] .term { border: 1px solid var(--borda); }
+:root[data-tema="escuro"] .toast { background: var(--papel-2); color: var(--tinta); border: 1px solid var(--borda); }
+:root[data-tema="escuro"] .nivel-cheio { background: rgba(18,19,23,.95); }
+/* as cores de módulo ficam mais claras no escuro, senão o título some no fundo */
+:root[data-tema="escuro"] .cena[data-modulo="0"] { --cor-modulo: #7cb0ff; }
+:root[data-tema="escuro"] .cena[data-modulo="1"] { --cor-modulo: #4fd1e8; }
+:root[data-tema="escuro"] .cena[data-modulo="2"] { --cor-modulo: #5bd48a; }
+:root[data-tema="escuro"] .cena[data-modulo="3"] { --cor-modulo: #b49bff; }
+:root[data-tema="escuro"] .cena[data-modulo="4"] { --cor-modulo: #ff9d5c; }
+:root[data-tema="escuro"] .cena[data-modulo="5"] { --cor-modulo: #f5c451; }
+:root[data-tema="escuro"] .cena[data-modulo="6"] { --cor-modulo: #ff8080; }
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body { overflow: hidden; }          /* o deck nunca rola */
+body.rolavel { overflow: auto; }
+
+h1, h2, h3 { margin: 0; line-height: 1.1; letter-spacing: -0.02em; }
+p { margin: 0; line-height: 1.5; }
+button { font: inherit; color: inherit; }
+
+/* ── palco ───────────────────────────────────────────────────────────────── */
+.palco {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+/* projetor: a cena ocupa a tela inteira, sem barra de operação embaixo */
+.palco-limpo { grid-template-rows: minmax(0, 1fr); }
+/*
+ * A cena rola quando o conteúdo é maior que a tela, em vez de cortar.
+ * `justify-content: center` só vale quando sobra espaço: com conteúdo grande,
+ * centralizar é o que empurrava o começo para fora da tela.
+ */
+.cena {
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+  gap: var(--respiro);
+  /* ocupa a altura toda (o Encaixe dá a altura da tela) e a largura toda,
+     até um teto para a linha não ficar impossível de ler num monitor ultralargo */
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: var(--margem-y) var(--margem-x);
+  min-height: 0;
+  /* animação definida em bloco único mais abaixo (cena-entra): não duplicar aqui */
+}
+/*
+ * As margens mudam por FAIXA de tela, e não com vw: um clamp com vw gera 37px,
+ * 51px… e cada cena acabava com uma margem diferente da outra.
+ */
+@media (min-width: 1600px) { :root { --margem-y: 48px; --margem-x: 64px; --respiro: 32px; } }
+@media (max-width: 900px) { :root { --margem-y: 24px; --margem-x: 24px; --respiro: 16px; } }
+@media (max-width: 560px) { :root { --margem-y: 16px; --margem-x: 16px; } }
+@media (prefers-reduced-motion: reduce) {
+  .cena { animation: none; }
+  * { transition-duration: 0.01ms !important; }
+}
+
+/*
+ * ESCALA TIPOGRÁFICA
+ *
+ * Seis tamanhos, e nenhuma cena escolhe o seu. Antes cada cena trazia o próprio
+ * `clamp(...)` no estilo em linha: o título de uma ficava maior que o da
+ * seguinte sem motivo, e a tela parecia desmontada a cada avanço de slide.
+ *
+ * t1 capa de módulo · t2 título de cena · t3 subtítulo e pergunta de quiz
+ * t4 corpo grande · t5 corpo · t6 apoio
+ */
+:root {
+  --t1: clamp(32px, 4.4vw, 72px);
+  --t2: clamp(24px, 2.9vw, 46px);
+  --t3: clamp(19px, 2.1vw, 32px);
+  --t4: clamp(16px, 1.7vw, 24px);
+  --t5: clamp(14px, 1.4vw, 19px);
+  --t6: clamp(12px, 1.1vw, 15px);
+}
+
+/* o sobre-título: sempre na cor do módulo, sempre acima do título */
+.olho {
+  font-size: var(--t6);
+  color: var(--cor-modulo, var(--acento));
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: var(--e1);
+}
+
+.titulo { font-size: var(--t1); font-weight: 760; }
+.titulo-cena { font-size: var(--t2); font-weight: 720; letter-spacing: -0.015em; }
+.titulo-secao { font-size: var(--t3); font-weight: 700; }
+.corpo { font-size: var(--t4); color: var(--tinta-2); }
+/* sem largura máxima: o texto usa a largura da cena em vez de quebrar no meio dela */
+.corpo-p { font-size: var(--t5); color: var(--tinta-2); line-height: 1.5; }
+.apoio { font-size: var(--t6); color: var(--tinta-2); }
+
+/*
+ * CABEÇALHO DA CENA
+ *
+ * Mesma estrutura em toda cena: ilustração à esquerda, sobre-título e título à
+ * direita, e um fio na cor do módulo embaixo. Posição idêntica em todas as
+ * telas é o que faz a pessoa parar de reprocessar o layout a cada slide e usar
+ * a cabeça no conteúdo.
+ */
+.cabecalho {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--e2);
+  padding-bottom: var(--e2);
+  border-bottom: 2px solid var(--cor-modulo, var(--borda));
+}
+.cabecalho .moldura {
+  width: 64px;
+  aspect-ratio: 1;
+  border-radius: var(--r-m);
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--cor-modulo, var(--acento)) 12%, var(--papel));
+  padding: var(--e1);
+}
+.cabecalho .textos { display: grid; gap: var(--e1); }
+@media (max-width: 900px) { .cabecalho .moldura { width: 48px; } }
+
+/* cor de cada módulo: dá identidade e ajuda a saber onde a turma está */
+.cena[data-modulo="0"] { --cor-modulo: #2563eb; }
+.cena[data-modulo="1"] { --cor-modulo: #0891b2; }
+.cena[data-modulo="2"] { --cor-modulo: #16a34a; }
+.cena[data-modulo="3"] { --cor-modulo: #7c3aed; }
+.cena[data-modulo="4"] { --cor-modulo: #ea580c; }
+.cena[data-modulo="5"] { --cor-modulo: #ca8a04; }
+.cena[data-modulo="6"] { --cor-modulo: #dc2626; }
+
+/* ── barra inferior ──────────────────────────────────────────────────────── */
+.barra {
+  display: flex; align-items: center; gap: var(--e2);
+  padding: var(--e2) var(--e3);
+  border-top: 1px solid var(--borda);
+  background: var(--papel-2);
+  font-size: 15px;
+}
+.barra .cresce { margin-left: auto; }
+.chip {
+  display: inline-flex; align-items: center; gap: var(--e1);
+  min-height: var(--h-p); padding: 0 var(--e2);
+  border: 1px solid var(--borda); border-radius: 999px;
+  background: var(--papel); color: var(--tinta); font-size: var(--t6);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.chip.forte { border-color: var(--acento); color: var(--acento); font-weight: 650; }
+/* o chip do cronômetro e da contagem, no topo da pergunta: um tamanho só */
+.chip.grande { min-height: var(--h); font-size: var(--t5); }
+button.chip { cursor: pointer; font: inherit; font-size: var(--t6); }
+
+/* ── botões ──────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--e1);
+  min-height: var(--h); padding: var(--e1) var(--e2);
+  border: 1px solid var(--borda); background: var(--papel); color: var(--tinta);
+  border-radius: var(--r-p); cursor: pointer;
+  transition: transform 160ms var(--ease), background 160ms ease;
+}
+.btn:hover { background: var(--papel-2); }
+.btn:active { transform: scale(0.97); }
+.btn.primario { background: var(--tinta); color: var(--papel); border-color: var(--tinta); font-weight: 650; }
+.btn.primario:hover { background: var(--tinta-hover); border-color: var(--tinta-hover); }
+
+/* ── terminal ────────────────────────────────────────────────────────────── */
+.term {
+  background: var(--term-fundo); color: var(--term-tinta);
+  border-radius: var(--r-m); padding: var(--e3);
+  font-family: var(--mono); font-size: clamp(14px, 1.3vw, 21px);
+  line-height: 1.6; overflow: auto; white-space: pre-wrap;
+}
+/* o terminal é sempre escuro, nos dois temas: ênfase e tecla dentro dele
+   usam cor própria, senão o negrito (cor da tinta do slide) some no fundo */
+.term strong { color: #ffffff !important; }
+.term .kbd { background: #26262c; border-color: #3a3a42; color: #ffd479; }
+.term .cmd::before { content: "$ "; color: #7dd3a0; }
+.term .cmd { color: #fff; }
+.term .saida { color: #a7a7b0; }
+.term .saida b { color: #ffd479; font-weight: 600; }
+.term .traducao {
+  display: block; margin: var(--e1) 0 var(--e2);
+  font-family: var(--sans); font-size: 0.8em; color: #a7a7b0;
+  border-left: 2px solid #3a3a42; padding-left: var(--e2);
+}
+
+/* ── quiz ────────────────────────────────────────────────────────────────── */
+.alternativas { display: grid; gap: var(--e2); grid-template-columns: 1fr 1fr; }
+@media (max-width: 760px) { .alternativas { grid-template-columns: 1fr; } }
+.alt {
+  display: flex; align-items: center; gap: var(--e2); text-align: left;
+  min-height: 80px; padding: var(--e2) var(--e3);
+  border: 2px solid var(--borda); border-radius: var(--r-m);
+  background: var(--papel); color: var(--tinta); cursor: pointer; font-size: clamp(17px, 1.7vw, 24px);
+  transition: transform 160ms var(--ease), border-color 160ms ease, background 160ms ease;
+}
+.alt:active { transform: scale(0.985); }
+.alt:disabled { cursor: default; }
+.alt:hover:not(:disabled) { border-color: var(--tinta-2); }
+.alt[data-escolhida="true"] { border-color: var(--acento); background: var(--acento-suave); }
+.alt[data-estado="certa"] { border-color: var(--ok); background: var(--ok-suave); }
+.alt[data-estado="errada"] { opacity: 0.45; }
+.alt .letra {
+  width: var(--e4); height: var(--e4); flex: none; border-radius: var(--r-p);
+  display: grid; place-items: center; background: var(--papel-2);
+  font-family: var(--mono); font-weight: 700;
+}
+.barra-votos { height: 8px; border-radius: 999px; background: var(--acento); transition: width 500ms linear; }
+/* quantos votaram em cada alternativa: grande e no centro da coluna, para ler
+   do fundo da sala (era um número de 13px encostado na barra) */
+.votos-alt { display: grid; justify-items: center; align-content: center; gap: var(--e05); min-width: 96px; }
+.numero-votos { font-size: clamp(22px, 2.4vw, 40px); line-height: 1; font-variant-numeric: tabular-nums; }
+.acertos-quiz {
+  display: flex; align-items: baseline; justify-content: center; gap: var(--e2);
+  text-align: center; font-size: clamp(18px, 1.8vw, 28px); color: var(--tinta-2);
+}
+.acertos-quiz strong { font-size: clamp(40px, 5vw, 84px); line-height: 1; color: var(--ok); font-variant-numeric: tabular-nums; }
+
+/* ── critérios do lab ────────────────────────────────────────────────────── */
+.criterios { display: grid; gap: var(--e1); }
+.criterio { display: flex; gap: var(--e2); align-items: flex-start; font-size: clamp(15px, 1.4vw, 20px); }
+.criterio[data-ok="true"] { color: var(--ok); animation: acende 180ms var(--ease); }
+@keyframes acende { from { transform: scale(0.95); } }
+
+/* ── utilidades ──────────────────────────────────────────────────────────── */
+.grade { display: grid; gap: var(--e3); }
+/*
+ * `min-width: 0` nos filhos de grid é o que impede o estouro lateral: por
+ * padrão um item de grid não encolhe abaixo do tamanho do conteúdo, então um
+ * terminal ou um bloco de código empurra a coluna para fora da tela.
+ */
+.duas { display: grid; gap: var(--e4); grid-template-columns: 1.1fr 1fr; align-items: center; }
+.duas > *, .grade > *, .item-check > *, .controles > * { min-width: 0; }
+.term { max-width: 100%; overflow-x: auto; }
+.checklist, .cartao { max-width: 100%; }
+.item-check .texto-item { overflow-wrap: anywhere; }
+/* no laboratório o terminal leva a fatia maior */
+.duas-lab { grid-template-columns: minmax(280px, 1fr) minmax(360px, 1.15fr); }
+@media (max-width: 900px) {
+  .duas, .duas-lab { grid-template-columns: 1fr; }
+}
+.kbd {
+  font-family: var(--mono); font-size: 0.88em; padding: 0 var(--e1);
+  border: 1px solid var(--borda); border-bottom-width: 2px; border-radius: var(--r-p);
+  background: var(--papel-2); color: var(--tinta); white-space: nowrap;
+}
+.cartao { border: 1px solid var(--borda); border-radius: var(--r-m); padding: var(--e3); background: var(--papel); color: var(--tinta); }
+.centro { display: grid; place-items: center; height: 100vh; padding: var(--e3); }
+
+/* ── xterm.js ────────────────────────────────────────────────────────────── */
+.xterm { height: 100%; }
+.xterm-viewport { background: transparent !important; }
+
+/* ── avisos flutuantes (XP, badge, nível) ────────────────────────────────── */
+.flutuante {
+  position: fixed; z-index: 60; pointer-events: none;
+  animation: sobe 2.2s var(--ease) forwards;
+}
+@keyframes sobe {
+  0% { opacity: 0; transform: translateY(10px) scale(0.95); }
+  12% { opacity: 1; transform: translateY(0) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-8px); }
+}
+.toast {
+  position: fixed; bottom: 86px; left: 50%; transform: translateX(-50%);
+  z-index: 60; padding: var(--e2) var(--e3); border-radius: 999px;
+  background: var(--tinta); color: var(--papel); font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0,0,0,.2);
+}
+.nivel-cheio {
+  position: fixed; inset: 0; z-index: 70; display: grid; place-items: center;
+  background: rgba(250,250,249,.94); animation: sobe 2.6s var(--ease) forwards;
+}
+
+
+/* ── projetor: tudo maior, porque é lido da última fileira ───────────────── */
+.palco[data-papel="screen"] .titulo { font-size: clamp(40px, 5.2vw, 92px); }
+.palco[data-papel="screen"] .corpo { font-size: clamp(22px, 2.3vw, 38px); max-width: 28em; }
+.palco[data-papel="screen"] .olho { font-size: clamp(16px, 1.5vw, 24px); }
+.palco[data-papel="screen"] .alt { font-size: clamp(22px, 2.2vw, 34px); padding: var(--e3) var(--e4); min-height: 96px; }
+.palco[data-papel="screen"] .alt .letra { width: var(--e6); height: var(--e6); font-size: 22px; }
+.palco[data-papel="screen"] .term { font-size: clamp(18px, 1.7vw, 28px); }
+.palco[data-papel="screen"] .chip { font-size: clamp(15px, 1.3vw, 22px); min-height: var(--h); }
+.palco[data-papel="screen"] .criterio { font-size: clamp(18px, 1.7vw, 28px); }
+.palco[data-papel="screen"] .cartao { padding: var(--e4); }
+.palco[data-papel="screen"] .kbd { font-size: clamp(16px, 1.5vw, 26px); }
+.palco[data-papel="screen"] .barra { font-size: clamp(15px, 1.3vw, 20px); padding: var(--e2) var(--e4); }
+.palco[data-papel="screen"] { --respiro: 32px; }
+.palco[data-papel="screen"] .corpo-p { font-size: var(--t4); }
+
+/*
+ * Cenas densas (laboratório e jogos): respiro menor, porque elas carregam
+ * checklist, terminal e barra de ações ao mesmo tempo. Sem isto a cena ficava
+ * maior que a tela e o encaixe automático precisava reduzir a letra até o
+ * limite do legível.
+ */
+.cena[data-denso="true"] {
+  --respiro: 16px;
+  justify-content: flex-start;
+  padding: var(--e3) var(--margem-x);
+}
+.cena[data-denso="true"] .titulo { font-size: clamp(22px, 2.6vw, 40px); }
+.cena[data-denso="true"] .corpo { font-size: clamp(15px, 1.4vw, 21px); }
+.cena[data-denso="true"] .cartao { padding: var(--e2); }
+/* no laboratório as duas colunas descem até o fim da tela: o terminal cresce
+   em vez de deixar uma faixa vazia embaixo */
+.cena[data-denso="true"] .duas-lab { flex: 1 1 auto; align-items: stretch; }
+.duas-lab > .coluna { display: flex; flex-direction: column; gap: var(--e2); min-height: 0; }
+.duas-lab > .coluna > * { flex-shrink: 0; }   /* a lista não encolhe: a coluna rola */
+.duas-lab .term-lab { flex: 1 1 auto; flex-shrink: 1; min-height: 240px; }
+/* os cartões do chamado crescem para preencher a coluna e rolam por dentro */
+.duas-lab > .coluna > .cartoes-chamado { flex: 1 1 auto; flex-shrink: 1; min-height: 0; }
+/*
+ * Altura fixa: a cena tem exatamente a altura da tela (o Encaixe define), e a
+ * coluna da esquerda rola por dentro quando a lista é longa. Assim o terminal
+ * nunca encolhe e a letra nunca diminui.
+ */
+@media (min-width: 901px) {
+  .cena[data-altura-fixa="true"] { height: 100%; flex: 1 1 auto; overflow: hidden; }
+  .cena[data-altura-fixa="true"] .duas-lab { min-height: 0; }
+  .cena[data-altura-fixa="true"] .duas-lab > .coluna:first-child { overflow-y: auto; padding-right: var(--e1); }
+  .cena[data-altura-fixa="true"] .duas-lab > .coluna:last-child { overflow-y: auto; }
+}
+
+/* ── barras de controle ──────────────────────────────────────────────────── */
+/*
+ * Os controles vivem em GRUPOS separados por função, não numa fila única de
+ * botões. Com doze botões lado a lado ninguém acha o que precisa no meio de
+ * uma apresentação, e no notebook eles saíam da tela.
+ */
+.controles {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--e1);
+  padding: var(--e1) var(--e2);
+  border-top: 1px solid var(--borda);
+  background: var(--papel-2);
+  /* sem rolagem: os grupos viram menus (MenuControles) e a barra cabe numa
+     linha. A rolagem horizontal escondida deixava grupos inteiros fora da tela */
+  overflow: visible;
+  position: relative;
+  z-index: 40;
+}
+.bloco-controle {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0;
+  min-height: var(--h);
+  padding: 0 var(--e1);
+  border: 1px solid var(--borda);
+  border-radius: var(--r);
+  background: var(--papel);
+  white-space: nowrap;
+}
+.bloco-controle > .rotulo {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tinta-2);
+  margin: 0 var(--e1);
+  user-select: none;
+  white-space: nowrap;
+}
+.btn-icone {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e1);
+  min-height: var(--h-p);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--tinta);
+  border-radius: var(--r-p);
+  padding: 0 var(--e1);
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 140ms ease, transform 140ms var(--ease);
+  white-space: nowrap;
+}
+.btn-icone:hover:not(:disabled) { background: var(--papel-2); }
+.btn-icone:active:not(:disabled) { transform: scale(0.97); }
+.btn-icone:disabled { opacity: 0.4; cursor: default; }
+.btn-icone.destaque { background: var(--tinta); color: var(--papel); font-weight: 650; padding: 0 var(--e2); }
+.btn-icone.destaque:hover:not(:disabled) { background: var(--tinta-hover); }
+select.btn-icone, input.btn-icone { font: inherit; font-size: 13px; }
+.estado-faixa {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  align-items: center;
+  gap: var(--e1);
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--tinta-2);
+  white-space: nowrap;
+}
+@media (max-width: 1120px) {
+  .bloco-controle > .rotulo { display: none; }
+}
+@media (max-width: 860px) {
+  .btn-icone .texto { display: none; }        /* no celular sobra só o ícone */
+}
+
+/*
+ * Em tela pequena a escala inteira comprime um passo. A proporção entre os
+ * espaços continua a mesma (é a proporção que dá harmonia), mas o respiro
+ * absoluto diminui, porque num celular de 390px de largura 48px de respiro
+ * viram quase um sexto da tela.
+ */
+@media (max-width: 560px) {
+  :root {
+    --e3: 16px;
+    --e4: 24px;
+    --e5: 32px;
+    --e6: 32px;
+    --e8: 40px;
+  }
+  .alternativas { gap: var(--e1); }
+  .alt { padding: var(--e2); min-height: 64px; }
+  .cartao { padding: var(--e2); }
+}
+
+/* ── checklist do laboratório ────────────────────────────────────────────── */
+/*
+ * O checklist usa a linguagem do próprio terminal: a caixa de marcar é `[ ]`
+ * e `[✓]` em fonte mono, e o número do item vem com dois dígitos, como saída
+ * de comando. Nada de barra colorida na borda: a mudança de estado aparece no
+ * próprio marcador, que é onde o olho vai.
+ *
+ * Os itens são separados por fio, e não por cartões soltos: seis cartões com
+ * borda viram seis retângulos competindo entre si, e a pessoa perde a noção de
+ * que aquilo é UMA lista.
+ */
+.checklist {
+  display: grid;
+  border: 1px solid var(--borda);
+  border-radius: var(--r-m);
+  background: var(--papel);
+  overflow: hidden;
+}
+
+.item-check {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: var(--e2);
+  padding: var(--e2);
+  transition: background 200ms ease;
+}
+.item-check + .item-check { border-top: 1px solid var(--borda); }
+.item-check[data-ok="true"] { background: color-mix(in srgb, var(--ok) 7%, var(--papel)); }
+
+/* o marcador: [ ] virando [✓], em mono, como uma saída de terminal */
+.item-check .marca {
+  font-family: var(--mono);
+  font-size: 1em;
+  color: var(--tinta-2);
+  white-space: nowrap;
+  user-select: none;
+}
+.item-check[data-ok="true"] .marca { color: var(--ok); font-weight: 700; }
+
+.item-check .texto-item { display: grid; gap: var(--e05); line-height: 1.5; }
+.item-check[data-ok="true"] .texto-item > span:first-child { color: var(--tinta); }
+
+.item-check .pista {
+  display: flex; gap: var(--e05); align-items: flex-start;
+  font-size: 0.86em; color: var(--atencao);
+}
+
+/* a etiqueta de XP enche quando o item fica pronto */
+.item-check .xp-item {
+  font-family: var(--mono); font-size: 0.8em; white-space: nowrap;
+  padding: 0 var(--e1); border-radius: 999px;
+  border: 1px solid var(--borda); color: var(--tinta-2); background: var(--papel-2);
+  transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+.item-check[data-ok="true"] .xp-item {
+  background: var(--ok); border-color: var(--ok); color: var(--sobre-ok); font-weight: 700;
+}
+
+/* barra de progresso do laboratório */
+.progresso {
+  display: flex; align-items: center; gap: var(--e2);
+}
+.progresso .trilha {
+  flex: 1; height: var(--e1); border-radius: 999px;
+  background: var(--papel-2); border: 1px solid var(--borda); overflow: hidden;
+}
+.progresso .cheio {
+  height: 100%; border-radius: 999px; background: var(--ok);
+  transition: width 320ms var(--ease);
+}
+
+
+/* ── campo de resposta dos laboratórios ──────────────────────────────────── */
+/*
+ * O input tem largura intrínseca (o atributo `size` do HTML), e isso empurrava
+ * a coluna para fora da tela no celular mesmo com flex-shrink. Aqui ele é
+ * sempre 100% da linha, e o botão desce para baixo quando não cabe ao lado.
+ */
+.caixa-resposta {
+  border: 2px solid var(--acento);
+  border-radius: var(--r-m);
+  padding: var(--e2);
+  background: var(--acento-suave);
+  display: grid;
+  gap: var(--e1);
+  max-width: 100%;
+}
+.caixa-resposta[data-preenchida="true"] { border-color: var(--ok); }
+.caixa-resposta .linha {
+  display: flex;
+  gap: var(--e1);
+  align-items: center;
+}
+/* campo do tamanho de um botão (40px), ocupa a linha inteira do grid */
+.caixa-resposta input {
+  width: 100%;
+  min-width: 0;
+  height: var(--h);
+  padding: 0 var(--e2);
+  font-family: var(--mono);
+  font-size: var(--t5);
+  border: 1px solid var(--borda);
+  border-radius: var(--r-p);
+  background: var(--papel);
+  color: var(--tinta);
+  box-sizing: border-box;
+}
+.caixa-resposta input:focus { outline: 2px solid var(--acento); outline-offset: 0; }
+.caixa-resposta .btn-icone { min-height: var(--h); }
+
+/* ── espera do Kahoot: a cena ainda não foi liberada ─────────────────────── */
+.aguardando {
+  border-style: dashed;
+  border-color: var(--acento);
+  background: var(--acento-suave);
+}
+
+/* ── comandos do módulo: o que fazem e como usar ─────────────────────────── */
+/*
+ * Três colunas alinhadas (comando, o que faz, exemplo), separadas por fio,
+ * como o checklist: é UMA tabela de consulta, não uma nuvem de etiquetas.
+ */
+.lista-comandos {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  border: 1px solid var(--borda);
+  border-radius: var(--r-m);
+  background: var(--papel);
+  overflow: hidden;
+}
+.linha-comando { display: contents; }
+.linha-comando > * {
+  padding: var(--e1) var(--e2);
+  border-top: 1px solid var(--borda);
+  display: flex; align-items: center;
+  font-size: var(--t6);
+}
+.linha-comando:first-child > * { border-top: 0; }
+.linha-comando .kbd { border: 0; border-top: 1px solid var(--borda); border-radius: 0; background: transparent; font-weight: 700; color: var(--acento); font-size: var(--t6); }
+.linha-comando:first-child .kbd { border-top: 0; }
+.linha-comando .faz { color: var(--tinta); }
+.linha-comando .exemplo { font-family: var(--mono); color: var(--tinta-2); white-space: nowrap; }
+/* compacta (coluna estreita do laboratório, celular): o exemplo desce para
+   baixo do "o que faz", e a explicação ganha a largura toda */
+.lista-comandos.compacta { grid-template-columns: max-content minmax(0, 1fr); }
+/* resumo (fecho final): só o comando e o que ele faz */
+.lista-comandos.resumo { grid-template-columns: max-content minmax(0, 1fr); }
+.lista-comandos.resumo .exemplo { display: none; }
+.grade-resumo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--e2); align-items: start; }
+@media (max-width: 1100px) { .grade-resumo { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .grade-resumo { grid-template-columns: 1fr; } }
+.lista-comandos.compacta .linha-comando .exemplo { grid-column: 2; border-top: 0; padding-top: 0; white-space: normal; }
+.lista-comandos.compacta .linha-comando .faz:has(+ .exemplo:not(:empty)) { padding-bottom: 0; }
+.lista-comandos.compacta .linha-comando .exemplo:empty { display: none; }
+@media (max-width: 760px) {
+  .lista-comandos { grid-template-columns: max-content minmax(0, 1fr); }
+  .linha-comando .exemplo { grid-column: 2; border-top: 0; padding-top: 0; white-space: normal; }
+  .linha-comando .exemplo:empty { display: none; }
+}
+.palco[data-papel="screen"] .linha-comando > * { font-size: var(--t5); }
+
+/* ── controles da tela (slide de abertura) ───────────────────────────────── */
+.grade-controles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--e2);
+}
+@media (max-width: 1100px) { .grade-controles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .grade-controles { grid-template-columns: 1fr; } }
+.grade-teclas { display: flex; flex-wrap: wrap; gap: var(--e2) var(--e4); }
+.item-controle {
+  display: grid; grid-template-columns: var(--h) 1fr; gap: var(--e2); align-items: start;
+  padding: var(--e2); border: 1px solid var(--borda); border-radius: var(--r-m); background: var(--papel);
+}
+.item-controle .icone {
+  width: var(--h); height: var(--h); border-radius: var(--r-p);
+  display: grid; place-items: center; background: var(--acento-suave);
+}
+.item-controle strong { display: block; font-size: var(--t5); margin-bottom: var(--e1); }
+.item-controle span { font-size: var(--t6); color: var(--tinta-2); line-height: 1.5; }
+
+/* ── caça ao erro: linhas clicáveis dentro do terminal ───────────────────── */
+.linhas-caca { display: grid; gap: var(--e1); padding: var(--e2); }
+.linha-caca {
+  text-align: left; font-family: var(--mono); font-size: var(--t5); cursor: pointer;
+  min-height: var(--h-p); padding: 0 var(--e2); border-radius: var(--r-p);
+  background: transparent; color: #e8e8ea; border: 1px solid #2c2c33;
+}
+.linha-caca:hover:not(:disabled) { border-color: #4a4a55; }
+.linha-caca[data-marcada="true"] { background: #3a1f1f; color: #ffa198; border-color: #ff7b72; }
+.linha-caca:disabled { cursor: default; }
+.btn:disabled { opacity: 0.45; cursor: default; }
+
+/* ══════════════════════ TELA DO PARTICIPANTE: MAIS LEVE ══════════════════
+ * O notebook é lido a 50cm, não a 10 metros: a escala do projetor ali fica
+ * gritando, e cada cena cabe menos conteúdo. O participante tem a sua.
+ */
+.palco[data-papel="player"], .palco[data-papel="host"] {
+  /* tamanhos de site: fixos, não crescem com a largura da tela */
+  --t1: 36px;
+  --t2: 26px;
+  --t3: 20px;
+  --t4: 17px;
+  --t5: 15px;
+  --t6: 13px;
+  --margem-y: 24px;
+  --margem-x: 32px;
+  --respiro: 16px;
+}
+:is(.palco[data-papel="player"], .palco[data-papel="host"]) .alt { font-size: 17px; min-height: 56px; padding: var(--e1) var(--e2); }
+:is(.palco[data-papel="player"], .palco[data-papel="host"]) .alt .letra { width: var(--e4); height: var(--e4); }
+:is(.palco[data-papel="player"], .palco[data-papel="host"]) .term { font-size: 14px; padding: var(--e2); }
+:is(.palco[data-papel="player"], .palco[data-papel="host"]) .cabecalho .moldura { width: 48px; }
+:is(.palco[data-papel="player"], .palco[data-papel="host"]) .cartao { padding: var(--e2); }
+:is(.palco[data-papel="player"], .palco[data-papel="host"]) .titulo-cena { font-size: var(--t2); }
+:is(.palco[data-papel="player"], .palco[data-papel="host"]) .veredito { min-height: 48px; }
+@media (max-width: 560px) {
+  .palco[data-papel="player"] { --t1: 28px; --t2: 22px; --t3: 18px; --margem-x: 16px; --margem-y: 16px; }
+}
+
+/* ═══════════════════════════ LABORATÓRIO: CONQUISTA ═════════════════════ */
+/* o marcador vira uma caixinha que se enche de verde */
+.item-check .caixa-marca {
+  display: inline-grid; place-items: center; width: 24px; height: 24px; margin-left: var(--e1);
+  border: 2px solid var(--borda); border-radius: var(--r-p); vertical-align: middle;
+  font-weight: 800; color: var(--sobre-ok); transition: background 200ms ease, border-color 200ms ease;
+}
+.item-check[data-ok="true"] .caixa-marca { background: var(--ok); border-color: var(--ok); }
+/* item que acabou de ficar pronto: pulsa, brilha e a caixinha "pula" */
+.item-check[data-novo="true"] { animation: item-pronto 1.4s var(--ease); }
+.item-check[data-novo="true"] .caixa-marca { animation: marca-pula 600ms var(--ease); }
+@keyframes item-pronto {
+  0% { background: color-mix(in srgb, var(--ok) 35%, var(--papel)); transform: scale(1.02); }
+  100% { background: color-mix(in srgb, var(--ok) 7%, var(--papel)); transform: scale(1); }
+}
+@keyframes marca-pula { 0% { transform: scale(0.4); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+/* o "+40 XP" que sobe no meio da tela quando um item fecha */
+.ganho-xp {
+  position: fixed; left: 50%; top: 40%; z-index: 65; pointer-events: none;
+  transform: translateX(-50%); font-size: var(--t1); font-weight: 800; color: var(--ok);
+  text-shadow: 0 4px 24px color-mix(in srgb, var(--ok) 40%, transparent);
+  animation: sobe-xp 2.2s var(--ease) forwards;
+}
+@keyframes sobe-xp {
+  0% { opacity: 0; transform: translate(-50%, 24px) scale(0.6); }
+  20% { opacity: 1; transform: translate(-50%, 0) scale(1.15); }
+  35% { transform: translate(-50%, 0) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -48px); }
+}
+.ganho-flutuante { right: var(--e4); bottom: 88px; font-size: var(--t3); font-weight: 800; color: var(--ok); }
+
+/* conferência automática: um ponto que respira enquanto confere */
+.acoes-lab { display: flex; align-items: center; gap: var(--e2); flex-wrap: wrap; justify-content: space-between; }
+.conferindo { display: inline-flex; align-items: center; gap: var(--e1); font-size: var(--t6); color: var(--tinta-2); }
+.conferindo .ponto { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); opacity: 0.5; }
+.conferindo[data-ativo="true"] .ponto { animation: respira 900ms ease-in-out infinite; opacity: 1; }
+@keyframes respira { 50% { transform: scale(1.6); opacity: 0.4; } }
+
+/* comandos do módulo: gaveta recolhível */
+.gaveta-comandos { border: 1px solid var(--borda); border-radius: var(--r-m); background: var(--papel); }
+.gaveta-comandos > summary {
+  display: flex; align-items: center; gap: var(--e1); cursor: pointer; list-style: none;
+  min-height: var(--h); padding: 0 var(--e2); font-size: var(--t6); font-weight: 650; color: var(--tinta);
+}
+.gaveta-comandos > summary::-webkit-details-marker { display: none; }
+.gaveta-comandos > summary::after { content: '▸'; margin-left: auto; color: var(--tinta-2); transition: transform 160ms ease; }
+.gaveta-comandos[open] > summary::after { transform: rotate(90deg); }
+.gaveta-comandos[open] > summary { border-bottom: 1px solid var(--borda); }
+.gaveta-comandos > .lista-comandos { border: 0; border-radius: 0 0 var(--r-m) var(--r-m); }
+
+/* ═══════════════════════════════ PÓDIO ═══════════════════════════════════ */
+.podio { display: grid; gap: var(--e3); }
+/*
+ * O pódio desenhado, como no Kahoot: três colunas na ordem 2º, 1º, 3º. Em cima
+ * de cada degrau, o avatar grande, o nome e os pontos; o degrau tem altura de
+ * pódio de verdade (o 1º é o mais alto) e cor de medalha. Os degraus sobem um
+ * de cada vez, do 3º para o 1º, para criar o suspense de quem ganhou.
+ */
+.cena-podio { justify-content: flex-start; }
+.cena-podio .podio { flex: 1 1 auto; grid-template-rows: 1fr auto auto; }
+.degraus {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--e2);
+  align-items: end; max-width: 960px; width: 100%; margin: 0 auto; min-height: 360px;
+}
+.coluna-podio { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-width: 0; }
+.coluna-podio .quem {
+  display: grid; justify-items: center; gap: var(--e1); text-align: center; padding-bottom: var(--e2);
+  animation: aparece-cima 500ms var(--ease) both; animation-delay: calc(var(--atraso, 0ms) + 350ms);
+}
+.coluna-podio .coroa { animation: marca-pula 700ms var(--ease) both; animation-delay: calc(var(--atraso, 0ms) + 700ms); }
+.coluna-podio .avatar {
+  width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 56px; line-height: 1; font-weight: 800; background: var(--papel-2);
+  border: 4px solid var(--borda); box-shadow: var(--sombra);
+}
+.coluna-podio[data-pos="1"] .avatar { width: 120px; height: 120px; font-size: 72px; border-color: #e3b341; }
+.coluna-podio[data-pos="2"] .avatar { border-color: #a7b0bd; }
+.coluna-podio[data-pos="3"] .avatar { border-color: #c98b5a; }
+.coluna-podio[data-eu="true"] .avatar { outline: 4px solid var(--acento); outline-offset: 4px; }
+.coluna-podio .nome { font-size: var(--t4); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.coluna-podio .pontos { font-family: var(--mono); font-size: var(--t3); font-weight: 800; }
+.degrau {
+  width: 100%; display: grid; place-items: start center; padding-top: var(--e2);
+  border-radius: var(--r-m) var(--r-m) 0 0; color: #fff; font-size: clamp(40px, 5vw, 80px); font-weight: 900;
+  transform-origin: bottom; animation: degrau-sobe 700ms var(--ease) both; animation-delay: var(--atraso, 0ms);
+  box-shadow: inset 0 -8px 0 rgba(0, 0, 0, 0.12);
+}
+.coluna-podio[data-pos="1"] .degrau { height: 200px; background: linear-gradient(#f2c94c, #d4a52a); }
+.coluna-podio[data-pos="2"] .degrau { height: 144px; background: linear-gradient(#c3cad4, #98a1ad); }
+.coluna-podio[data-pos="3"] .degrau { height: 104px; background: linear-gradient(#dba174, #b97a4a); }
+.ganho, .ranking .ganho {
+  font-size: var(--t6); font-weight: 700; color: var(--ok);
+  padding: 0 var(--e1); border-radius: 999px; background: var(--ok-suave);
+}
+@keyframes degrau-sobe { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes aparece-cima { from { opacity: 0; transform: translateY(-24px) scale(0.8); } }
+.palco[data-papel="screen"] .coluna-podio[data-pos="1"] .degrau { height: 240px; }
+.palco[data-papel="screen"] .coluna-podio[data-pos="1"] .avatar { width: 144px; height: 144px; font-size: 88px; }
+@media (max-width: 640px) {
+  .coluna-podio .avatar { width: 64px; height: 64px; font-size: 36px; }
+  .coluna-podio[data-pos="1"] .avatar { width: 80px; height: 80px; font-size: 48px; }
+  .coluna-podio[data-pos="1"] .degrau { height: 140px; }
+  .coluna-podio[data-pos="2"] .degrau { height: 100px; }
+  .coluna-podio[data-pos="3"] .degrau { height: 72px; }
+  .degraus { min-height: 260px; }
+}
+
+.ranking {
+  list-style: none; margin: 0 auto; padding: 0; display: grid; gap: var(--e1);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); width: 100%; max-width: 960px;
+}
+.ranking .avatar-p { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; font-size: 16px; }
+.ranking li {
+  display: grid; grid-template-columns: var(--e5) 1fr auto auto; align-items: center; gap: var(--e2);
+  min-height: var(--h); padding: 0 var(--e2); border: 1px solid var(--borda); border-radius: var(--r-p);
+  background: var(--papel); animation: entra-lado 400ms var(--ease) both; animation-delay: var(--atraso, 0ms);
+}
+.ranking li[data-eu="true"] { border-color: var(--acento); background: var(--acento-suave); }
+.ranking .posicao { font-family: var(--mono); font-weight: 800; color: var(--tinta-2); }
+.ranking .pontos { font-family: var(--mono); font-weight: 700; }
+@keyframes entra-lado { from { opacity: 0; transform: translateX(-24px); } }
+.minha-posicao { font-size: var(--t5); color: var(--tinta-2); text-align: center; }
+.faixa-ganho {
+  display: flex; align-items: center; justify-content: center; gap: var(--e1);
+  min-height: var(--h-g); border-radius: var(--r-m); font-size: var(--t4);
+  background: var(--ok-suave); color: var(--ok); animation: marca-pula 600ms var(--ease);
+}
+.revelacao { align-items: start; }
+
+/* ═══════════════════════════ EVENTO AO VIVO ══════════════════════════════ */
+.evento-fundo {
+  position: fixed; inset: 0; z-index: 75; display: grid; place-items: center; padding: var(--e3);
+  background: color-mix(in srgb, var(--tinta) 40%, transparent); animation: aparece 200ms ease;
+}
+.evento-cartao {
+  position: relative; width: min(560px, 100%); display: grid; gap: var(--e2); justify-items: start;
+  padding: var(--e5) var(--e4) var(--e4); border-radius: var(--r-g); background: var(--papel);
+  border: 2px solid var(--acento); box-shadow: var(--sombra); animation: marca-pula 500ms var(--ease);
+}
+.evento-icone {
+  position: absolute; top: calc(-1 * var(--e4)); left: var(--e4);
+  width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--acento); box-shadow: var(--sombra);
+}
+.evento-voce {
+  font-size: var(--t5); font-weight: 650; color: var(--tinta);
+  padding: var(--e2); border-radius: var(--r-p); background: var(--acento-suave); width: 100%;
+}
+@keyframes aparece { from { opacity: 0; } }
+
+/* ═════════════════════════════ CONQUISTA ═════════════════════════════════ */
+.conquista {
+  position: fixed; right: var(--e3); top: var(--e3); z-index: 72; overflow: hidden;
+  display: flex; gap: var(--e2); align-items: center; max-width: min(420px, calc(100vw - 48px));
+  padding: var(--e2) var(--e3); border-radius: var(--r-m); background: var(--papel);
+  border: 2px solid var(--atencao); box-shadow: var(--sombra);
+  animation: conquista-entra 5s var(--ease) forwards;
+}
+.conquista[data-minha="false"] { border-width: 1px; border-color: var(--borda); padding: var(--e1) var(--e2); }
+.conquista strong { display: block; font-size: var(--t4); }
+.medalha-giro { display: grid; animation: gira 900ms var(--ease); }
+@keyframes gira { from { transform: rotateY(540deg) scale(0.4); } }
+@keyframes conquista-entra {
+  0% { transform: translateX(120%); }
+  8%, 90% { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(120%); opacity: 0; }
+}
+
+/* confete: tiras que caem girando */
+.confete { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.confete span {
+  position: absolute; top: -16px; width: 8px; height: 16px; border-radius: 2px;
+  animation: cai 1.6s cubic-bezier(.3,.6,.5,1) forwards;
+}
+@keyframes cai { to { transform: translateY(110vh) rotate(var(--giro, 360deg)); opacity: 0.7; } }
+.nivel-cartao {
+  position: relative; text-align: center; display: grid; justify-items: center; gap: var(--e1);
+  padding: var(--e5); border-radius: var(--r-g); background: var(--papel); border: 2px solid var(--ok);
+  box-shadow: var(--sombra); animation: marca-pula 600ms var(--ease);
+}
+@media (prefers-reduced-motion: reduce) {
+  .confete { display: none; }
+  .degrau, .ranking li, .conquista, .ganho-xp, .item-check[data-novo="true"] { animation: none; }
+}
+
+/* ═════════════════ PÓDIO DUPLO: PESSOAS E EQUIPES LADO A LADO ═════════════
+ * Cada lado é um pódio menor (degraus mais baixos, avatar menor) com os cinco
+ * seguintes embaixo, numa coluna. A escala menor é o que deixa os dois placares
+ * e os oito primeiros de cada um na mesma tela, sem rolar.
+ */
+.podio-duplo { flex: 1 1 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e4); align-items: start; }
+.lado-podio {
+  display: grid; gap: var(--e2); padding: var(--e3); min-width: 0;
+  border: 1px solid var(--borda); border-radius: var(--r-g); background: var(--papel);
+}
+.lado-podio .podio { gap: var(--e2); grid-template-rows: none; }
+.lado-podio .degraus { min-height: 0; max-width: none; gap: var(--e1); }
+.lado-podio .coluna-podio .avatar { width: 56px; height: 56px; font-size: 32px; border-width: 3px; }
+.lado-podio .coluna-podio[data-pos="1"] .avatar { width: 72px; height: 72px; font-size: 44px; }
+.lado-podio .coluna-podio .quem { gap: var(--e05); padding-bottom: var(--e1); }
+.lado-podio .coluna-podio .nome { font-size: var(--t5); }
+.lado-podio .coluna-podio .pontos { font-size: var(--t4); }
+.lado-podio .coluna-podio .coroa .ilustra, .lado-podio .coluna-podio .coroa svg { width: 32px; height: 32px; }
+.lado-podio .degrau { font-size: clamp(28px, 3vw, 48px); padding-top: var(--e1); }
+.lado-podio .coluna-podio[data-pos="1"] .degrau { height: 128px; }
+.lado-podio .coluna-podio[data-pos="2"] .degrau { height: 96px; }
+.lado-podio .coluna-podio[data-pos="3"] .degrau { height: 72px; }
+.lado-podio .ranking { grid-template-columns: 1fr; max-width: none; }
+.lado-podio .ranking li { min-height: var(--h-p); }
+.palco[data-papel="screen"] .lado-podio .coluna-podio[data-pos="1"] .degrau { height: 160px; }
+.palco[data-papel="screen"] .lado-podio .coluna-podio[data-pos="1"] .avatar { width: 96px; height: 96px; font-size: 56px; }
+@media (max-width: 900px) { .podio-duplo { grid-template-columns: 1fr; } }
+
+/* ═══════════════════════════ KAHOOT: CORES E MOVIMENTO ═══════════════════
+ * As quatro alternativas têm as cores e formas do Kahoot. É o que a turma já
+ * conhece de olhar: ninguém precisa ler "A, B, C, D" para achar a sua, e a
+ * forma (▲ ◆ ● ■) garante que quem não distingue cor também acha.
+ */
+.alternativas.kahoot .alt {
+  border: 0; color: #ffffff; font-weight: 700;
+  box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.18);
+  animation: alt-pop 420ms var(--ease) both;
+  animation-delay: calc(var(--ordem, 0) * 90ms);
+}
+.alternativas.kahoot .alt[data-cor="0"] { background: #e21b3c; }
+.alternativas.kahoot .alt[data-cor="1"] { background: #1368ce; }
+.alternativas.kahoot .alt[data-cor="2"] { background: #c98a00; }
+.alternativas.kahoot .alt[data-cor="3"] { background: #26890c; }
+.alternativas.kahoot .alt .letra { background: rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 1.1em; }
+.alternativas.kahoot .alt:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-2px); }
+.alternativas.kahoot .alt:disabled { cursor: default; }
+/* a escolhida ganha um contorno; as outras recuam enquanto espera a revelação */
+.alternativas.kahoot .alt[data-escolhida="true"] { outline: 4px solid var(--tinta); outline-offset: 3px; }
+.alternativas.kahoot:has(.alt[data-escolhida="true"]) .alt:not([data-escolhida="true"]) { opacity: 0.45; }
+/* revelação: a certa pulsa e ganha brilho, as erradas apagam */
+.alternativas.kahoot .alt[data-estado="certa"] { opacity: 1; animation: certa 700ms var(--ease) both; box-shadow: 0 0 0 4px var(--ok), inset 0 -6px 0 rgba(0,0,0,.18); }
+.alternativas.kahoot .alt[data-estado="errada"] { opacity: 0.3; filter: grayscale(0.6); }
+.alternativas.kahoot .alt .barra-votos { background: rgba(255, 255, 255, 0.85); }
+.alternativas.kahoot .alt small, .alternativas.kahoot .alt strong { color: #ffffff !important; }
+@keyframes alt-pop {
+  0% { opacity: 0; transform: scale(0.6); }
+  70% { opacity: 1; transform: scale(1.01); }
+  100% { transform: scale(1); }
+}
+@keyframes certa { 0% { transform: scale(1); } 40% { transform: scale(1.06); } 100% { transform: scale(1); } }
+
+/* a pergunta entra com zoom, como a tela de pergunta do Kahoot */
+.pergunta-quiz { animation: pergunta-entra 500ms var(--ease) both; }
+@keyframes pergunta-entra { from { opacity: 0; transform: scale(0.85); } }
+
+/* barra de tempo: encolhe a cada segundo e fica vermelha nos 5 finais */
+.barra-tempo { height: var(--e1); border-radius: 999px; background: var(--papel-2); overflow: hidden; border: 1px solid var(--borda); }
+.barra-tempo > span { display: block; height: 100%; border-radius: 999px; background: var(--acento); transition: width 1s linear, background 300ms ease; }
+.barra-tempo > span[data-pouco="true"] { background: var(--erro); animation: respira 600ms ease-in-out infinite; }
+
+/* troca de slide: entra deslizando e crescendo, não só aparece */
+.cena { animation: cena-entra 380ms var(--ease) both; }
+/* sem deslocar para baixo nem crescer além do tamanho final: qualquer um dos
+   dois cria um transbordo momentâneo e faz a barra de rolagem piscar */
+@keyframes cena-entra { from { opacity: 0; transform: scale(0.98); } }
+
+/* conteúdo liberado (exercício, terminal, botão): surge com um "pop" */
+.alternativas.kahoot, .linhas-caca { animation: alt-pop 420ms var(--ease) both; }
+.aguardando { animation: respira-suave 2.4s ease-in-out infinite; }
+@keyframes respira-suave { 50% { border-color: var(--borda); } }
+@media (prefers-reduced-motion: reduce) {
+  .alternativas.kahoot .alt, .pergunta-quiz, .cena, .aguardando { animation: none; }
+}
+/* veredito do quiz na tela de quem respondeu */
+.veredito {
+  display: flex; align-items: center; justify-content: center; gap: var(--e2);
+  min-height: 64px; border-radius: var(--r-m); font-size: var(--t3); font-weight: 800; color: #ffffff;
+  background: #c62828; animation: alt-pop 500ms var(--ease) both;
+}
+.veredito[data-certo="true"] { background: #26890c; }
+/* o veredito quebra em linhas no centro, sem esticar a cena */
+.veredito { flex-wrap: wrap; text-align: center; padding: var(--e1) var(--e2); line-height: 1.25; }
+.certa-veredito {
+  display: inline-flex; align-items: center; gap: var(--e1); max-width: 100%;
+  padding: 4px var(--e2) 4px 4px; border-radius: 999px; background: rgba(255,255,255,.16); font-size: .85em;
+}
+.certa-veredito .forma {
+  display: inline-grid; place-items: center; width: 1.6em; height: 1.6em; border-radius: 999px; flex: none;
+  border: 2px solid #fff;
+}
+.certa-veredito .forma[data-cor="0"] { background: #e21b3c; }
+.certa-veredito .forma[data-cor="1"] { background: #1368ce; }
+.certa-veredito .forma[data-cor="2"] { background: #c98a00; }
+.certa-veredito .forma[data-cor="3"] { background: #26890c; }
+/* pódio final: o "e o primeiro lugar é…" pulsa e some quando o 1º sobe */
+.degraus { position: relative; }
+.rufar {
+  position: absolute; left: 50%; top: 24%; translate: -50% 0; z-index: 3; white-space: nowrap;
+  padding: var(--e1) var(--e3); border-radius: 999px; background: var(--papel); box-shadow: var(--sombra);
+  font-size: var(--t3); font-weight: 800; color: var(--atencao);
+  opacity: 0; animation: rufar 1.9s ease both; animation-delay: var(--atraso, 0ms);
+}
+@keyframes rufar {
+  0% { opacity: 0; transform: scale(0.8); }
+  15%, 35%, 55%, 75% { opacity: 1; transform: scale(1.08); }
+  25%, 45%, 65%, 85% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.2); }
+}
+/* confete com atraso: escondido até a hora (o "both" segura o primeiro quadro) */
+.confete span { animation-fill-mode: both; }
+.lado-podio { position: relative; overflow: hidden; }
+/* atividade revisitada depois de passar: tudo travado, só para ler */
+.so-leitura { display: flex; flex-direction: column; flex: 1 0 auto; }
+.so-leitura [inert] { cursor: default; }
+.faixa-leitura {
+  display: flex; align-items: center; justify-content: center; gap: var(--e1);
+  min-height: var(--h-p); font-size: var(--t6); font-weight: 650;
+  color: var(--tinta-2); background: var(--papel-2); border-bottom: 1px solid var(--borda);
+}
+.so-leitura .alt, .so-leitura button { filter: saturate(0.6); }
+/* resposta de um exercício de escolha: faixa colorida, como o veredito do quiz */
+.veredito-widget {
+  display: flex; align-items: center; gap: var(--e2); flex-wrap: wrap;
+  padding: var(--e2); border-radius: var(--r-m); font-size: var(--t5);
+  background: var(--erro-suave); border: 2px solid var(--erro); color: var(--tinta);
+  animation: alt-pop 400ms var(--ease) both;
+}
+.veredito-widget[data-certo="true"] { background: var(--ok-suave); border-color: var(--ok); }
+/* a árvore de pastas do "Onde eu caio?": uma coluna, com recuo por nível */
+.alternativas.arvore-pastas { grid-template-columns: 1fr; gap: var(--e1); }
+.alternativas.arvore-pastas .alt { min-height: var(--h-g); }
+/* peças de montar (encanamento): as cores do quiz, em botão menor */
+.peca-colorida {
+  display: grid; gap: var(--e05); text-align: left; cursor: pointer;
+  min-height: var(--h-g); padding: var(--e1) var(--e2); border: 0; border-radius: var(--r-p);
+  font-family: var(--mono); font-weight: 700; color: #ffffff;
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.18); animation: alt-pop 380ms var(--ease) both;
+}
+.peca-colorida small { font-family: var(--sans); font-weight: 500; opacity: 0.9; }
+.peca-colorida[data-cor="0"] { background: #e21b3c; }
+.peca-colorida[data-cor="1"] { background: #1368ce; }
+.peca-colorida[data-cor="2"] { background: #c98a00; }
+.peca-colorida[data-cor="3"] { background: #26890c; }
+.peca-colorida:hover { filter: brightness(1.08); }
+/* recuo da árvore de pastas: um passo de 24px por nível (8px no celular) */
+.alternativas.arvore-pastas .alt { margin-left: calc(var(--nivel, 0) * 24px); overflow-wrap: anywhere; }
+@media (max-width: 560px) { .alternativas.arvore-pastas .alt { margin-left: calc(var(--nivel, 0) * 8px); } }
+
+/* passa ou repassa: quem acertou, grande o bastante para o fundo da sala */
+.vencedor-buzzer {
+  display: grid; justify-items: center; gap: var(--e1); text-align: center;
+  padding: var(--e3); border: 2px solid var(--ok); border-radius: var(--r-g);
+  background: color-mix(in srgb, var(--ok) 8%, var(--papel));
+  font-size: clamp(16px, 1.6vw, 24px);
+  animation: entra-vencedor 420ms cubic-bezier(.2,.9,.3,1.3) both;
+}
+.vencedor-buzzer .nome-vencedor { font-size: clamp(40px, 6vw, 96px); line-height: 1.05; color: var(--ok); }
+@keyframes entra-vencedor { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .vencedor-buzzer { animation: none; } }
+
+/* ── menus da barra de baixo ─────────────────────────────────────────────── */
+.menu-controles { position: relative; flex-shrink: 0; }
+.menu-controles > .btn-icone { border: 1px solid var(--borda); background: var(--papel); min-height: var(--h); }
+.menu-controles[data-aberto="true"] > .btn-icone { border-color: var(--acento); }
+.menu-controles .seta { font-size: 10px; color: var(--tinta-2); }
+.destaque-menu {
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px;
+  background: var(--erro); color: #fff; font-size: 11px; font-weight: 700;
+  display: inline-grid; place-items: center;
+}
+.painel-controles {
+  position: absolute; bottom: calc(100% + var(--e1)); left: 0;
+  display: grid; gap: var(--e05); min-width: 220px; max-width: min(360px, 92vw);
+  padding: var(--e1); border: 1px solid var(--borda); border-radius: var(--r);
+  background: var(--papel); box-shadow: 0 12px 32px rgba(0,0,0,.18);
+  animation: abre-menu 140ms var(--ease) both;
+}
+.painel-controles[data-lado="direita"] { left: auto; right: 0; }
+.painel-controles .btn-icone { justify-content: flex-start; width: 100%; min-height: var(--h); }
+/* dentro do menu o rótulo aparece sempre, mesmo no celular */
+.painel-controles .btn-icone .texto { display: inline; }
+.painel-controles .chip { justify-self: start; }
+.painel-controles .info-menu { font-size: 12px; color: var(--tinta-2); padding: var(--e05) var(--e1); }
+@keyframes abre-menu { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .painel-controles { animation: none; } }
+
+/* a foto preenche o círculo do pódio, qualquer que seja o degrau */
+.coluna-podio .avatar img { width: 100% !important; height: 100% !important; }
+
+/* apresentação de uma pessoa: foto, história e o QR do LinkedIn lado a lado */
+.perfil-apresentacao {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--e4);
+  align-items: center;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  animation: entra-pessoa 380ms var(--ease) both;
+}
+.foto-apresentacao {
+  width: clamp(140px, 17vw, 240px); height: auto; aspect-ratio: 1; border-radius: 50%;
+  object-fit: cover; border: 4px solid var(--tinta);
+}
+.texto-apresentacao { display: grid; gap: var(--e2); }
+.cargo-apresentacao { font-size: var(--t4); color: var(--acento); }
+.linkedin-apresentacao { display: grid; justify-items: center; gap: var(--e1); }
+@keyframes entra-pessoa { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .perfil-apresentacao { animation: none; } }
+@media (max-width: 900px) {
+  .perfil-apresentacao { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+}
+
+/* ── o chamado com cartões de comando ────────────────────────────────────── */
+/* overflow: hidden aqui faz o container grid respeitar a altura do flex-pai;
+   sem ele o grid crescia sem limite e a página inteira rolava em vez do painel */
+.cartoes-chamado { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--e2); min-height: 0; overflow: hidden; }
+.mao-de-cartoes, .registro-chamado { display: grid; gap: var(--e1); align-content: start; min-height: 0; overflow-y: auto; overflow-x: hidden; max-height: 100%; }
+.naipe { display: grid; gap: var(--e1); }
+.cartao-comando {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--e1); align-items: center;
+  padding: var(--e1) var(--e2); border: 1px solid var(--borda); border-radius: var(--r); background: var(--papel);
+  transition: border-color 140ms ease, transform 140ms var(--ease);
+}
+.cartao-comando:hover { border-color: var(--acento); }
+.texto-cartao { font-family: var(--mono); font-size: 14px; overflow-wrap: anywhere; }
+.texto-cartao input {
+  font: inherit; width: auto; max-width: 100%; padding: 2px 6px; margin: 0 2px;
+  border: 1px dashed var(--acento); border-radius: var(--r-p); background: var(--papel-2); color: var(--tinta);
+}
+.erro-cartao { grid-column: 1 / -1; color: var(--erro); }
+.jogada { display: grid; gap: 4px; padding: var(--e1); border-radius: var(--r); background: var(--papel-2); animation: abre-menu 200ms var(--ease) both; }
+.jogada .quem { font-size: 12px; color: var(--tinta-2); }
+.jogada .cmd { font-family: var(--mono); font-size: 13px; }
+.jogada .saida { margin: 0; font-family: var(--mono); font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 140px; overflow: auto; }
+.jogada[data-armadilha] { border: 1px solid var(--atencao); }
+.aviso-armadilha { display: flex; gap: var(--e05); align-items: flex-start; font-size: 13px; color: var(--atencao); }
+@media (max-width: 900px) { .cartoes-chamado { grid-template-columns: 1fr; } }
+
+/* ── roleta: cartunesca de propósito (contorno grosso, cor viva, tudo quica) ── */
+.roleta-fundo {
+  position: fixed; inset: 0; z-index: 62; display: grid; place-items: center; padding: var(--e2);
+  background: radial-gradient(circle at 50% 40%, rgba(255, 204, 0, .25), rgba(11,11,12,.6) 70%);
+  animation: abre-menu 200ms ease both;
+}
+.roleta-cartao {
+  display: grid; justify-items: center; gap: var(--e2); text-align: center;
+  /* nunca passa da janela: no celular e no notebook baixo ele rola por dentro */
+  width: min(600px, 100%); max-height: calc(100dvh - 2 * var(--e2)); overflow: auto; padding: var(--e3) var(--e2);
+  border: 4px solid #1f2937; border-radius: 28px; background: var(--papel);
+  box-shadow: 0 10px 0 #1f2937, 0 28px 64px rgba(0,0,0,.35);
+  animation: pula-entrada 520ms cubic-bezier(.2,1.6,.4,1) both;
+}
+.roleta-topo { display: grid; justify-items: center; gap: var(--e1); }
+.roleta-selo {
+  padding: 4px var(--e2); border: 3px solid #1f2937; border-radius: 999px; background: #ffcc00; color: #1f2937;
+  font-weight: 900; text-transform: uppercase; letter-spacing: .08em; transform: rotate(-3deg);
+  box-shadow: 0 4px 0 #1f2937;
+}
+.roleta-quem { display: flex; gap: var(--e2); align-items: center; text-align: left; }
+.roleta-quem > div { display: grid; }
+.roleta-nome { font-size: clamp(26px, 3.4vw, 44px); line-height: 1.05; }
+.roleta-roda { position: relative; width: min(360px, 72vw, 40dvh); aspect-ratio: 1; margin-top: 14px; filter: drop-shadow(0 8px 0 rgba(31,41,55,.35)); }
+.roleta-roda[data-fase="girar"] .roleta-svg { animation: chama-giro 1.6s ease-in-out infinite; }
+.roleta-svg { width: 100%; height: 100%; overflow: visible; }
+.roleta-giro { transition: transform 3.8s cubic-bezier(.12,.75,.1,1); transform-origin: 0 0; }
+.roleta-ponteiro { position: absolute; top: -18px; left: 50%; width: 44px; translate: -50% 0; z-index: 1; transform-origin: 50% 20%; }
+.roleta-roda[data-girando] .roleta-ponteiro { animation: tique 120ms ease-in-out infinite alternate; }
+.luz { fill: #fff3b0; }
+.luz[data-par] { animation: pisca 600ms steps(1) infinite; }
+.luz:not([data-par]) { animation: pisca 600ms steps(1) 300ms infinite; }
+.fatia[data-sorteada] { animation: sorteada 700ms ease-in-out 3; transform-origin: 0 0; }
+.roleta-fatia { display: flex; gap: var(--e1); align-items: center; font-size: var(--t3); font-weight: 900; }
+.roleta-fatia span { font-size: 1.4em; animation: quica 900ms ease-in-out infinite; }
+.roleta-texto { font-size: var(--t4); color: var(--tinta-2); }
+.roleta-resultado { font-size: clamp(22px, 2.8vw, 38px); font-weight: 900; color: var(--ok); animation: pula-entrada 520ms cubic-bezier(.2,1.6,.4,1) both; }
+.roleta-dinamica { font-size: var(--t4); max-width: 44ch; padding: var(--e2); border: 3px dashed #1f2937; border-radius: 18px; background: var(--papel-2); }
+.roleta-opcoes { display: flex; gap: var(--e1); flex-wrap: wrap; justify-content: center; }
+.btn-girar {
+  font: inherit; font-size: clamp(24px, 3vw, 36px); font-weight: 900; letter-spacing: .06em; cursor: pointer;
+  padding: var(--e2) var(--e6); border: 4px solid #1f2937; border-radius: 999px; color: #1f2937;
+  background: linear-gradient(#ffe066, #ffb703); box-shadow: 0 8px 0 #1f2937;
+  animation: respira 1.1s ease-in-out infinite;
+}
+.btn-girar:active { transform: translateY(6px); box-shadow: 0 2px 0 #1f2937; }
+/* cartões de lance (pedra, papel, tesoura; par ou ímpar) e de adversário */
+.cartoes-lance { display: flex; gap: var(--e2); flex-wrap: wrap; justify-content: center; }
+/* escolha de adversário: scroll vertical quando a turma é grande */
+.escolha-adversario {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--e1);
+  max-height: min(280px, 38vh);
+  overflow-y: auto;
+  padding: var(--e05);
+  border: 1px solid var(--borda);
+  border-radius: var(--r);
+  background: var(--papel-2);
+}
+.cartao-lance {
+  display: grid; justify-items: center; gap: var(--e05); width: 120px; padding: var(--e2) var(--e1); cursor: pointer;
+  font: inherit; font-size: var(--t5); color: #1f2937; border: 4px solid #1f2937; border-radius: 20px; background: #fff;
+  box-shadow: 0 8px 0 #1f2937; animation: carta-entra 520ms cubic-bezier(.2,1.6,.4,1) both; animation-delay: calc(var(--i, 0) * 110ms);
+  transition: transform 160ms var(--ease), box-shadow 160ms var(--ease);
+}
+.cartao-lance:nth-child(3n+1) { background: #ffe3e3; }
+.cartao-lance:nth-child(3n+2) { background: #e3f0ff; }
+.cartao-lance:nth-child(3n+3) { background: #fff4d6; }
+.cartao-lance:hover { transform: translateY(-8px) rotate(-3deg); }
+.cartao-lance:active { transform: translateY(4px); box-shadow: 0 2px 0 #1f2937; }
+.emoji-lance { font-size: 52px; line-height: 1; }
+.cartao-pessoa {
+  display: grid; justify-items: center; gap: 4px; width: 100%; padding: var(--e1); cursor: pointer; font: inherit;
+  border: 3px solid #1f2937; border-radius: 16px; background: var(--papel); color: var(--tinta); box-shadow: 0 4px 0 #1f2937;
+  animation: carta-entra 300ms cubic-bezier(.2,1.6,.4,1) both; animation-delay: calc(var(--i, 0) * 30ms);
+  font-size: clamp(12px, 1.1vw, 14px);
+}
+.cartao-pessoa:hover { transform: translateY(-3px); }
+/* duelo: os dois lados frente a frente */
+.duelo { display: grid; grid-template-columns: 1fr auto 1fr; gap: var(--e2); align-items: center; width: 100%; }
+.lado-duelo { position: relative; display: grid; justify-items: center; gap: var(--e05); padding: var(--e2); border: 3px solid #1f2937; border-radius: 20px; background: var(--papel-2); }
+.lado-duelo[data-venceu] { background: #fff4d6; animation: sorteada 700ms ease-in-out 3; }
+.coroa-duelo { position: absolute; top: -22px; font-size: 32px; animation: quica 800ms ease-in-out infinite; }
+.carta-virada { font-size: 44px; line-height: 1; }
+.carta-virada[data-virada] { animation: vira 600ms cubic-bezier(.2,1.4,.4,1) both; }
+.vs { font-size: clamp(26px, 3vw, 40px); font-weight: 900; color: #ff5a5f; -webkit-text-stroke: 2px #1f2937; animation: quica 700ms ease-in-out infinite; }
+/* o resto da turma: uma faixa no alto, que não cobre o trabalho de ninguém */
+.faixa-roleta {
+  font: inherit; cursor: pointer;
+  position: fixed; top: var(--e2); left: 50%; translate: -50% 0; z-index: 55; display: flex; gap: var(--e1); align-items: center;
+  max-width: calc(100vw - 2 * var(--e2)); padding: var(--e1) var(--e3); border: 3px solid #1f2937; border-radius: 999px;
+  background: #ffcc00; color: #1f2937; font-size: 15px; box-shadow: 0 5px 0 #1f2937;
+  animation: pula-entrada 420ms cubic-bezier(.2,1.6,.4,1) both;
+}
+.faixa-duelo { background: #fff; }
+.lado-faixa[data-venceu] { font-weight: 900; }
+.vs-faixa { color: #ff5a5f; }
+.palco[data-papel="screen"] .roleta-roda { width: min(560px, 52vh); }
+.palco[data-papel="screen"] .roleta-cartao { width: min(900px, 100%); }
+@keyframes pula-entrada { from { opacity: 0; transform: scale(.6) rotate(-4deg); } to { opacity: 1; transform: none; } }
+@keyframes carta-entra { from { opacity: 0; transform: translateY(40px) rotate(12deg) scale(.7); } to { opacity: 1; transform: none; } }
+@keyframes chama-giro { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@keyframes tique { from { rotate: -10deg; } to { rotate: 8deg; } }
+@keyframes pisca { 0% { fill: #fff3b0; } 50% { fill: #ff7a00; } }
+@keyframes sorteada { 0%, 100% { filter: none; } 50% { filter: brightness(1.35) saturate(1.3); } }
+@keyframes quica { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes respira { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@keyframes vira { from { transform: rotateY(90deg) scale(.6); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .roleta-giro { transition: none; }
+  .roleta-cartao, .roleta-svg, .roleta-ponteiro, .luz, .fatia, .roleta-fatia span, .btn-girar, .cartao-lance,
+  .cartao-pessoa, .coroa-duelo, .carta-virada, .vs, .faixa-roleta, .lado-duelo { animation: none !important; }
+}
+
+/* os chips da barra nunca quebram linha nem crescem: a barra tem uma linha só */
+.estado-faixa .chip { flex: none; white-space: nowrap; padding: 2px var(--e1); font-size: 12px; }
+/* par ou ímpar: seis cartões de dedos, menores, numa fileira que quebra */
+.cartoes-dedos .cartao-lance { width: 84px; }
+.cartoes-dedos .emoji-lance { font-size: 40px; font-weight: 900; }
+.carta-virada { font-weight: 900; }
+
+/* corpo da roleta: roda e jogo. Antes do giro, a roda manda; depois, ela vai
+   para o lado (ou para cima, no celular) e o duelo cabe inteiro na tela */
+.roleta-corpo { display: grid; justify-items: center; gap: var(--e2); width: 100%; }
+.roleta-etapa { display: grid; justify-items: center; gap: var(--e2); width: 100%; min-width: 0; }
+.roleta-corpo[data-girou] .roleta-roda { width: min(240px, 50vw, 26dvh); transition: width 500ms var(--ease) 3.6s; }
+@media (min-width: 900px) {
+  .roleta-cartao:has(.roleta-corpo[data-girou]) { width: min(1100px, 100%); }
+  .roleta-corpo[data-girou] { grid-template-columns: auto minmax(0, 1fr); align-items: center; }
+  .roleta-corpo[data-girou] .roleta-roda { width: min(300px, 40vh); }
+}
+.palco[data-papel="screen"] .roleta-corpo[data-girou] .roleta-roda { width: min(360px, 42vh); }
+/* listas longas (as dez equipes) rolam dentro do menu, sem passar da janela */
+.painel-controles { max-height: min(60dvh, 480px); overflow-y: auto; }
+
+/* ── ilustrações e fotos nos slides ────────────────────────────────────────── */
+.slide-figura {
+  margin: var(--e1) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  /* sem animação própria: a .cena já entra com fade ao trocar slide.
+     Animar a figura separado causava piscada ao avançar passos na mesma cena. */
+}
+.slide-figura img {
+  max-width: min(100%, 780px);
+  max-height: clamp(140px, 28vh, 260px);
+  object-fit: contain;
+  border-radius: var(--r-m);
+  border: 1px solid var(--borda);
+  background: var(--papel-2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+.slide-figura figcaption {
+  font-size: var(--t6);
+  color: var(--tinta-2);
+  margin-top: var(--e05);
+  text-align: center;
+  max-width: 580px;
+}
+
+
+/* cada degrau no seu lugar (2º, 1º, 3º) mesmo com menos de três pessoas */
+.degraus .coluna-podio { grid-row: 1; }
+.degraus .coluna-podio[data-pos="1"] { grid-column: 2; }
+.degraus .coluna-podio[data-pos="2"] { grid-column: 1; }
+.degraus .coluna-podio[data-pos="3"] { grid-column: 3; }

@@ -1,0 +1,37 @@
+{
+  "name": "kahoot-engenharia-dados",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "build": "rm -rf .next && next build",
+    "start": "rm -rf .next && next build && NODE_ENV=production node server.mjs",
+    "start:rapido": "NODE_ENV=production node server.mjs",
+    "typecheck": "tsc --noEmit",
+    "teste": "node testes/quiz.mjs",
+    "limpar": "rm -rf data && mkdir -p data",
+    "rede": "node scripts/rede.mjs",
+    "ilustracoes": "node scripts/extrair-ilustracoes.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "^1.59.0",
+    "next": "^15.1.0",
+    "qrcode": "^1.5.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "@svgmoji/noto": "^3.2.0",
+    "@types/node": "^22.10.0",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.0"
+  },
+  "overrides": {
+    "postcss": "^8.5.31"
+  }
+}
